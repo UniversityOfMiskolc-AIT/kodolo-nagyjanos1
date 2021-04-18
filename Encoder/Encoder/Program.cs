@@ -1,46 +1,58 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Encoder
 {
-    public class Encoder
-    {
-        public int[] Encode(string input)
-        {
-            var chArr = input.ToCharArray();
-            var chNum = input[0];
-
-            var result = new List<int>() { chNum };
-            for (var i = 1; i < chArr.Length; i++)
-            {
-                var distance = (chNum - chArr[i]) * -1;
-                result.Add(distance);
-                chNum = chArr[i];
-            }
-            return result.ToArray();
-        }
-
-        public string Decode(int[] input)
-        {            
-            var detCh = input[0];
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append((char)input[0]);
-            for (var i = 1; i < input.Length; i++)
-            {
-                detCh += input[i];
-                stringBuilder.Append((char)detCh);
-            }
-            return stringBuilder.ToString();
-        }
-    }
 
 
     class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            if (args.Length <= 1)
+            {
+                WriteInformation();
+            }
+
+            var encoder = new Encoder();
+
+            switch (args[0].ToLower())
+            {
+                case "-e":
+                    var stringBuilder = new StringBuilder();
+                    stringBuilder.AppendJoin(' ', args.Skip(1).ToArray());
+                    var encodedChars = encoder.Encode(stringBuilder.ToString());
+                    stringBuilder.Clear();
+                    stringBuilder.AppendJoin(' ', encodedChars);
+                    Console.WriteLine(stringBuilder);
+                    break;
+
+                case "-d":
+                    var encodedText = args.Skip(1)
+                                        .Select(x => int.TryParse(x, out int distance) ? distance : (int?)null)
+                                        .Where(x => x.HasValue)
+                                        .Select(x => x.Value)
+                                        .ToArray();
+                    var decodedText = encoder.Decode(encodedText);
+                    Console.WriteLine(decodedText);
+                    break;
+
+                default:
+                    WriteInformation();
+                    break;
+            }
+
+            Console.ReadKey();
+        }
+
+        private static void WriteInformation()
+        {
+            Console.WriteLine("SYNOPSIS:");
+
+            Console.WriteLine("DESCRIPTOM:");
+            Console.WriteLine("\t -e,-E {text} Kódolja a paraméterben kapott szöveget a fehér karakterek mentén.");
+            Console.WriteLine("\t -d,-D {array} Dekódolja a paraméterben kapott integer tömböt a fehér karakterek mentén.");
         }
     }
 }
